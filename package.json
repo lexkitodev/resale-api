@@ -8,7 +8,7 @@
     "dev": "ts-node server.ts"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "description": "",
   "dependencies": {
     "express": "^4.18.2"
