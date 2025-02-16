@@ -3,6 +3,7 @@ import { Pool } from 'pg';
 import cors from 'cors';
 import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
+import authRoutes from './src/routes/auth';
 
 const app: Express = express();
 const httpServer = createServer(app);
@@ -18,6 +19,9 @@ const io = new Server(httpServer, {
 });
 const port: number = 5001;
 
+// Add body parser middleware before routes
+app.use(express.json());
+
 // Enable CORS for all routes
 app.use(
   cors({
@@ -27,6 +31,12 @@ app.use(
     allowedHeaders: ['Content-Type', 'Authorization'],
   })
 );
+
+// Add logging middleware
+app.use((req: Request, res: Response, next) => {
+  console.log(`${req.method} ${req.path}`, req.body);
+  next();
+});
 
 // Create a new pool instance
 const pool = new Pool({
@@ -84,6 +94,9 @@ io.on('connection', (socket: Socket) => {
     });
   });
 });
+
+// Mount routes
+app.use('/auth', authRoutes);
 
 // Update server startup to use httpServer instead of app
 testDbConnection()
