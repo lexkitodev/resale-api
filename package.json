@@ -6,16 +6,22 @@
     "build": "tsc",
     "start": "node dist/server.js",
     "dev": "ts-node server.ts",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "prisma:studio": "prisma studio",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:generate": "prisma generate",
+    "prisma:seed": "ts-node prisma/seed.ts"
   },
   "author": "",
   "license": "MIT",
   "description": "",
   "dependencies": {
+    "@prisma/client": "^5.22.0",
     "express": "^4.18.2",
     "pg": "^8.11.3",
     "cors": "^2.8.5",
-    "socket.io": "^4.7.4"
+    "socket.io": "^4.7.4",
+    "bcrypt": "^5.1.1"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
@@ -30,12 +36,17 @@
     "@typescript-eslint/parser": "^6.19.0",
     "eslint": "^8.56.0",
     "prettier": "^3.2.5",
-    "@types/socket.io": "^3.0.2"
+    "@types/socket.io": "^3.0.2",
+    "prisma": "^5.22.0",
+    "@types/bcrypt": "^5.0.2"
   },
   "lint-staged": {
     "*.ts": [
       "eslint --fix",
       "prettier --write"
     ]
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }
