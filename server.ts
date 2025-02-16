@@ -10,12 +10,23 @@ const io = new Server(httpServer, {
   cors: {
     origin: process.env.CLIENT_URL || 'http://localhost:5173',
     methods: ['GET', 'POST'],
+    credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization'],
   },
+  // Add transport options
+  transports: ['websocket', 'polling'],
 });
-const port: number = 5000;
+const port: number = 5001;
 
 // Enable CORS for all routes
-app.use(cors());
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 
 // Create a new pool instance
 const pool = new Pool({
