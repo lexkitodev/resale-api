@@ -8,11 +8,19 @@ export class AuthController {
     try {
       const { email, password, marketingEmails } = req.body;
 
+      // Validate email
+      if (!email || !email.includes('@')) {
+        return res.status(400).json({
+          error: 'Valid email is required',
+        });
+      }
+
       // Validate password
       const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,32}$/;
       if (!passwordRegex.test(password)) {
         return res.status(400).json({
-          error: 'Password must meet the requirements',
+          error:
+            'Password must be 8-32 characters and include uppercase, lowercase, number and special character',
         });
       }
 
@@ -33,7 +41,7 @@ export class AuthController {
         data: {
           email,
           passwordHash,
-          marketingEmails,
+          marketingEmails: !!marketingEmails,
         },
       });
 
@@ -100,6 +108,17 @@ export class AuthController {
       });
     } catch (error) {
       console.error('Signin error:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
+  static async signout(req: Request, res: Response) {
+    try {
+      // Since we're using JWT, we don't need to do anything server-side
+      // The client will remove the token
+      res.json({ message: 'Signed out successfully' });
+    } catch (error) {
+      console.error('Signout error:', error);
       res.status(500).json({ error: 'Internal server error' });
     }
   }
