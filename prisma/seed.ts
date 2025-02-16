@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { UserSeeder } from './seeders/UserSeeder';
+import { seedCategories } from './seeders/CategorySeeder';
 
 const prisma = new PrismaClient();
 
@@ -8,6 +9,7 @@ async function main() {
 
   // Run seeders
   await new UserSeeder(prisma).run();
+  await seedCategories();
 
   console.log('✅ Seeding completed');
 }

@@ -4,6 +4,7 @@ import cors from 'cors';
 import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import authRoutes from './src/routes/auth';
+import categoryRoutes from './src/routes/categories';
 
 const app: Express = express();
 const httpServer = createServer(app);
@@ -97,6 +98,7 @@ io.on('connection', (socket: Socket) => {
 
 // Mount routes
 app.use('/auth', authRoutes);
+app.use('/categories', categoryRoutes);
 
 // Update server startup to use httpServer instead of app
 testDbConnection()
