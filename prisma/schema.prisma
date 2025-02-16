@@ -23,4 +23,22 @@ model Category {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  items       Item[]   @relation("ItemCategories")
+}
+
+model Item {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String?
+  startPrice  Decimal    @db.Decimal(10, 2)
+  currentBid  Decimal?   @db.Decimal(10, 2)
+  retailPrice Decimal    @db.Decimal(10, 2)
+  imageUrl    String
+  endTime     DateTime
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  categories  Category[] @relation("ItemCategories")
+
+  @@index([endTime])
+  @@index([createdAt])
 } 
