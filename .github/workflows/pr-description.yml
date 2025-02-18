@@ -1,0 +1,46 @@
+name: PR Description Generator
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  update-pr-description:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Generate PR description
+        id: generate-description
+        run: |
+          # Get commits between base and head
+          COMMITS=$(git log --pretty=format:"- %s%n  %b" ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | sed '/^[[:space:]]*$/d')
+          
+          # Create description with markdown
+          echo "# Changes in this Pull Request" > pr_description.md
+          echo "" >> pr_description.md
+          echo "## Commit History" >> pr_description.md
+          echo "" >> pr_description.md
+          echo "$COMMITS" >> pr_description.md
+          
+          # If PR already has a description, preserve it after a separator
+          if [ ! -z "${{ github.event.pull_request.body }}" ]; then
+            echo "" >> pr_description.md
+            echo "---" >> pr_description.md
+            echo "## Original Description" >> pr_description.md
+            echo "" >> pr_description.md
+            echo "${{ github.event.pull_request.body }}" >> pr_description.md
+          fi
+
+      - name: Update PR Description
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} --body-file pr_description.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
