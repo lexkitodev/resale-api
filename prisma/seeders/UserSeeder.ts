@@ -1,29 +1,35 @@
 import { PrismaClient } from '@prisma/client';
-import { UserFactory } from '../factories/userFactory';
+import bcrypt from 'bcrypt';
 
 export class UserSeeder {
   constructor(private prisma: PrismaClient) {}
 
   async run() {
-    // Create admin user
-    await this.prisma.user.create({
-      data: await UserFactory.make({
-        email: 'admin@bidhub.com',
-        marketingEmails: true,
-      }),
+    const adminPassword = await bcrypt.hash('Admin123!', 10);
+
+    // Create admin user using upsert
+    await this.prisma.user.upsert({
+      where: { email: 'admin@example.com' },
+      update: {}, // Keep existing data if user exists
+      create: {
+        email: 'admin@example.com',
+        passwordHash: adminPassword,
+        marketingEmails: false,
+      },
     });
 
-    // Create test user
-    await this.prisma.user.create({
-      data: await UserFactory.make({
+    // Create test user using upsert
+    const testPassword = await bcrypt.hash('Test123!', 10);
+    await this.prisma.user.upsert({
+      where: { email: 'test@example.com' },
+      update: {}, // Keep existing data if user exists
+      create: {
         email: 'test@example.com',
-      }),
+        passwordHash: testPassword,
+        marketingEmails: true,
+      },
     });
 
-    // Create random users
-    const randomUsers = await UserFactory.makeMany(5);
-    await this.prisma.user.createMany({
-      data: randomUsers,
-    });
+    console.log('✅ Users seeded');
   }
 }
