@@ -1,23 +1,5 @@
 import { Request, Response } from 'express';
-import { Prisma } from '@prisma/client';
 import prisma from '../lib/prisma';
-
-// Define the Item type based on Prisma schema
-type Item = {
-  id: number;
-  title: string;
-  description: string | null;
-  startPrice: Prisma.Decimal;
-  currentBid: Prisma.Decimal | null;
-  retailPrice: Prisma.Decimal;
-  imageUrl: string;
-  endTime: Date;
-  categories: {
-    id: number;
-    name: string;
-    slug: string;
-  }[];
-};
 
 export class CategoryController {
   static async getAll(req: Request, res: Response) {
@@ -36,8 +18,6 @@ export class CategoryController {
   }
 
   static async getItems(req: Request, res: Response) {
-    console.log('getItems');
-
     try {
       const { slug } = req.params;
       const page = parseInt(req.query.page as string) || 1;
@@ -51,19 +31,18 @@ export class CategoryController {
               some: { slug },
             },
           },
+          include: {
+            categories: {
+              select: {
+                id: true,
+                name: true,
+                slug: true,
+              },
+            },
+          },
           orderBy: { createdAt: 'desc' },
           take: limit,
           skip,
-          select: {
-            id: true,
-            title: true,
-            description: true,
-            startPrice: true,
-            currentBid: true,
-            retailPrice: true,
-            imageUrl: true,
-            endTime: true,
-          },
         }),
         prisma.item.count({
           where: {
@@ -74,12 +53,11 @@ export class CategoryController {
         }),
       ]);
 
-      // Convert Decimal to number for JSON response
-      const formattedItems = items.map((item: Item) => ({
+      const formattedItems = items.map((item) => ({
         ...item,
-        startPrice: Number(item.startPrice),
-        currentBid: item.currentBid ? Number(item.currentBid) : null,
-        retailPrice: Number(item.retailPrice),
+        startPrice: item.startPrice.toNumber(),
+        currentBid: item.currentBid?.toNumber() || null,
+        retailPrice: item.retailPrice.toNumber(),
       }));
 
       res.json({
@@ -127,11 +105,11 @@ export class CategoryController {
         prisma.item.count(),
       ]);
 
-      const formattedItems = items.map((item: Item) => ({
+      const formattedItems = items.map((item) => ({
         ...item,
-        startPrice: Number(item.startPrice),
-        currentBid: item.currentBid ? Number(item.currentBid) : null,
-        retailPrice: Number(item.retailPrice),
+        startPrice: item.startPrice.toNumber(),
+        currentBid: item.currentBid?.toNumber() || null,
+        retailPrice: item.retailPrice.toNumber(),
       }));
 
       return res.json({
@@ -185,9 +163,9 @@ export class CategoryController {
       // Convert Decimal to number for JSON response
       const formattedItem = {
         ...item,
-        startPrice: Number(item.startPrice),
-        currentBid: item.currentBid ? Number(item.currentBid) : null,
-        retailPrice: Number(item.retailPrice),
+        startPrice: item.startPrice.toNumber(),
+        currentBid: item.currentBid?.toNumber() || null,
+        retailPrice: item.retailPrice.toNumber(),
       };
 
       return res.json(formattedItem);

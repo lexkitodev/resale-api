@@ -5,6 +5,8 @@ import { createServer } from 'http';
 import { Server, Socket } from 'socket.io';
 import authRoutes from './src/routes/auth';
 import categoryRoutes from './src/routes/categories';
+import { socketAuth } from './src/middleware/socketAuth';
+import { BidController } from './src/controllers/BidController';
 
 const app: Express = express();
 const httpServer = createServer(app);
@@ -13,9 +15,7 @@ const io = new Server(httpServer, {
     origin: process.env.CLIENT_URL || 'http://localhost:5173',
     methods: ['GET', 'POST'],
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
   },
-  // Add transport options
   transports: ['websocket', 'polling'],
 });
 const port: number = 5001;
@@ -79,10 +79,10 @@ app.get('/health', async (req: Request, res: Response) => {
 
 // Socket.IO connection handling
 io.on('connection', (socket: Socket) => {
-  console.log('Client connected');
+  console.log('Socket connected:', socket.id);
 
   socket.on('disconnect', () => {
-    console.log('Client disconnected');
+    console.log('Client disconnected:', socket.id);
   });
 
   // Example: Send updates about database status
@@ -95,6 +95,12 @@ io.on('connection', (socket: Socket) => {
     });
   });
 });
+
+// Add socket middleware
+io.use(socketAuth);
+
+// Initialize bid controller with socket.io instance
+BidController.initialize(io);
 
 // Mount routes
 app.use('/auth', authRoutes);
